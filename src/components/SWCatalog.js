@@ -25,8 +25,17 @@ const SWCatalog = () => {
     fetchData();
   }, []);
 
-  // Group data by ECU name
-  const groupedData = data.reduce((acc, item) => {
+  // Filter data based on catalog, status, and search term
+  const filteredData = data.filter(item => {
+    const matchesCatalog = catalogFilter === 'SW CATALOG'; // Adjust catalog filtering if necessary
+    const matchesStatus = statusFilter === 'All' || item.status === statusFilter; // Example filter
+    const matchesSearch = item.ecuName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.containerId.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCatalog && matchesStatus && matchesSearch;
+  });
+
+  // Group filtered data by ECU name
+  const groupedData = filteredData.reduce((acc, item) => {
     if (!acc[item.ecuName]) {
       acc[item.ecuName] = [];
     }
@@ -158,7 +167,6 @@ const SWCatalog = () => {
                                 <th className="p-2 text-left">Container ID</th>
                                 <th className="p-2 text-left">Uploaded By</th>
                                 <th className="p-2 text-left">Date Uploaded</th>
-                              
                               </tr>
                             </thead>
                             <tbody>
@@ -171,16 +179,17 @@ const SWCatalog = () => {
                                   <td className="p-2 whitespace-nowrap">{row.uploadedBy || 'Unknown'}</td>
                                   <td className="p-2 whitespace-nowrap">{row.uploadDateTime || 'N/A'}</td>
                                   <td className="p-2 text-center">
-                                    <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
-                                      <FiEye className="text-xl" title="View" />
-                                    </button>
-                                  </td>
-                                  <td className="p-2 text-center">
-                                    {row.uploaded ? (
-                                      <FiCheckCircle className="text-green-500 text-xl" title="Uploaded" />
-                                    ) : (
-                                      <FiAlertCircle className="text-red-500 text-xl" title="Error" />
-                                    )}
+                                    <div className="flex justify-center items-center space-x-2">
+                                      <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
+                                        <span className="font-semibold">Modify</span>
+                                      </button>
+                                      <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
+                                        <FiDownload className="text-xl" title="Download" />
+                                      </button>
+                                      <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
+                                        <FiEye className="text-xl" title="View" />
+                                      </button>
+                                    </div>
                                   </td>
                                 </tr>
                               ))}
