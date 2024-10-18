@@ -1,6 +1,5 @@
-// src/components/SWCatalog.js
 import React, { useState, useEffect } from 'react';
-import { FiDownload, FiEye, FiCheckCircle, FiAlertCircle, FiHome } from 'react-icons/fi';
+import { FiDownload, FiEye, FiCheckCircle, FiAlertCircle, FiHome, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { getCatalogData } from '../services/apiService';
 
@@ -9,6 +8,8 @@ const SWCatalog = () => {
   const [catalogFilter, setCatalogFilter] = useState('SW CATALOG');
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedECUs, setExpandedECUs] = useState({}); // Track which ECU names are expanded
+  const [hoveredECU, setHoveredECU] = useState(null); // Track hovered ECU name
   const navigate = useNavigate();
 
   // Fetch catalog data from backend on component mount
@@ -16,7 +17,6 @@ const SWCatalog = () => {
     const fetchData = async () => {
       try {
         const catalogData = await getCatalogData();
-       
         setData(catalogData);
       } catch (error) {
         console.error('Error fetching catalog data:', error);
@@ -25,14 +25,22 @@ const SWCatalog = () => {
     fetchData();
   }, []);
 
-  // Filter data based on catalog, status, and search term
-  const filteredData = data.filter(item => {
-    const matchesCatalog = catalogFilter === 'SW CATALOG'; // Adjust catalog filtering if necessary
-    const matchesStatus = statusFilter === 'All' || item.status === statusFilter; // Example filter
-    const matchesSearch = item.ecuName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.containerId.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCatalog && matchesStatus && matchesSearch;
-  });
+  // Group data by ECU name
+  const groupedData = data.reduce((acc, item) => {
+    if (!acc[item.ecuName]) {
+      acc[item.ecuName] = [];
+    }
+    acc[item.ecuName].push(item);
+    return acc;
+  }, {});
+
+  // Toggle the expanded state of an ECU group
+  const toggleExpand = (ecuName) => {
+    setExpandedECUs(prevState => ({
+      ...prevState,
+      [ecuName]: !prevState[ecuName],
+    }));
+  };
 
   return (
     <div className="bg-white shadow rounded-lg w-full">
@@ -81,8 +89,6 @@ const SWCatalog = () => {
           <thead className="bg-gray-200 sticky top-0">
             <tr>
               <th className="p-2 text-left">ECU Name</th>
-              <th className="p-2 text-left">SW Type</th>
-              <th className="p-2 text-left">Version</th>
               <th className="p-2 text-left">Container ID</th>
               <th className="p-2 text-left">Uploaded By</th>
               <th className="p-2 text-left">Date Uploaded</th>
@@ -90,41 +96,101 @@ const SWCatalog = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredData.length === 0 ? (
+            {Object.keys(groupedData).length === 0 ? (
               <tr>
                 <td className="p-4 text-center" colSpan="7">No data available.</td>
               </tr>
             ) : (
-              filteredData.map((row, index) => (
-                <tr className="border-t" key={index}>
-                  <td className="p-2 whitespace-nowrap">{row.ecuName}</td>
-                  <td className="p-2 whitespace-nowrap">{row.swType}</td>
-                  <td className="p-2 whitespace-nowrap">{row.version}</td>
-                  <td className="p-2 whitespace-nowrap">{row.containerId}</td>
-                  <td className="p-2 whitespace-nowrap">{row.uploadedBy || 'Unknown'}</td>
-                  <td className="p-2 whitespace-nowrap">{row.uploadDateTime || 'N/A'}</td>
-                  <td className="p-2 text-center">
-                    <div className="flex justify-center items-center space-x-3">
-                      <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
-                        <FiEye className="text-xl" title="View" />
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
-                        <FiDownload className="text-xl" title="Download" />
-                      </button>
-                      {row.uploaded ? (
-                        <FiCheckCircle className="text-green-500 text-xl" title="Uploaded" />
-                      ) : (
-                        <FiAlertCircle className="text-red-500 text-xl" title="Error" />
-                      )}
-                      <button
-                        // Modify button will call the handleModify function, you can define your logic there.
-                        className="bg-yellow-500 text-white px-2 py-1 rounded"
+              Object.keys(groupedData).map((ecuName) => (
+                <React.Fragment key={ecuName}>
+                  {/* Main row with limited details */}
+                  <tr className="border-t">
+                    <td
+                      className="p-2 whitespace-nowrap"
+                      onMouseEnter={() => setHoveredECU(ecuName)}  // Set hovered ECU on mouse enter
+                      onMouseLeave={() => setHoveredECU(null)}  // Reset on mouse leave
+                    >
+                      <div
+                        className="flex items-center cursor-pointer"
+                        onClick={() => toggleExpand(ecuName)}
                       >
-                        Modify
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                        {expandedECUs[ecuName] ? <FiChevronDown /> : <FiChevronRight />}
+                        <span className="ml-2 font-semibold">{ecuName}</span>
+                      </div>
+                    </td>
+                    <td className="p-2 whitespace-nowrap">{groupedData[ecuName][0].containerId}</td>
+                    <td className="p-2 whitespace-nowrap">{groupedData[ecuName][0].uploadedBy || 'Unknown'}</td>
+                    <td className="p-2 whitespace-nowrap">{groupedData[ecuName][0].uploadDateTime || 'N/A'}</td>
+                    <td className="p-2 text-center">
+                      <div className="flex justify-center items-center space-x-3">
+                        {/* Show Modify button only when NOT hovering over the ECU Name */}
+                        {hoveredECU !== ecuName && (
+                          <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
+                            <span className="font-semibold">Modify</span>
+                          </button>
+                        )}
+                        <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
+                          <FiDownload className="text-xl" title="Download" />
+                        </button>
+                        <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
+                          <FiEye className="text-xl" title="View" />
+                        </button>
+                        {groupedData[ecuName][0].uploaded ? (
+                          <FiCheckCircle className="text-green-500 text-xl" title="Uploaded" />
+                        ) : (
+                          <FiAlertCircle className="text-red-500 text-xl" title="Error" />
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* Expanded section showing more details with limited Action icons */}
+                  {expandedECUs[ecuName] && (
+                    <tr>
+                      <td colSpan="5" className="p-2">
+                        <div className="max-h-48 overflow-y-auto">
+                          <table className="min-w-full table-auto">
+                            <thead className="bg-gray-100">
+                              <tr>
+                                <th className="p-2 text-left">ECU Name</th>
+                                <th className="p-2 text-left">SW Type</th>
+                                <th className="p-2 text-left">Version</th>
+                                <th className="p-2 text-left">Container ID</th>
+                                <th className="p-2 text-left">Uploaded By</th>
+                                <th className="p-2 text-left">Date Uploaded</th>
+                              
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {groupedData[ecuName].map((row, index) => (
+                                <tr className="border-t" key={index}>
+                                  <td className="p-2 whitespace-nowrap">{row.ecuName}</td>
+                                  <td className="p-2 whitespace-nowrap">{row.swType}</td>
+                                  <td className="p-2 whitespace-nowrap">{row.version}</td>
+                                  <td className="p-2 whitespace-nowrap">{row.containerId}</td>
+                                  <td className="p-2 whitespace-nowrap">{row.uploadedBy || 'Unknown'}</td>
+                                  <td className="p-2 whitespace-nowrap">{row.uploadDateTime || 'N/A'}</td>
+                                  <td className="p-2 text-center">
+                                    <button className="text-gray-600 hover:text-gray-800 p-1 focus:outline-none">
+                                      <FiEye className="text-xl" title="View" />
+                                    </button>
+                                  </td>
+                                  <td className="p-2 text-center">
+                                    {row.uploaded ? (
+                                      <FiCheckCircle className="text-green-500 text-xl" title="Uploaded" />
+                                    ) : (
+                                      <FiAlertCircle className="text-red-500 text-xl" title="Error" />
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))
             )}
           </tbody>
