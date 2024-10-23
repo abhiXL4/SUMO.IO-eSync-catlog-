@@ -1,103 +1,210 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { uploadSoftware } from '../services/apiService';  // Ensure this is correctly imported
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 
-const UploadSw = () => {
-  const [formData, setFormData] = useState({
-    file: null, // Store the selected file
-  });
-  const [dragActive, setDragActive] = useState(false); // State to handle drag over visual feedback
-  const navigate = useNavigate();
+const UploadPage = () => {
+  const [fileUploads, setFileUploads] = useState([{ id: 1 }]); // Start with one file upload section
+  const navigate = useNavigate(); // Initialize navigate for redirection
 
-  // Handle file change
-  const handleFileChange = (e) => {
-    setFormData({
-      ...formData,
-      file: e.target.files[0], // Set the selected file
-    });
+  const handleAddFile = () => {
+    const newFileUpload = { id: fileUploads.length + 1 };
+    setFileUploads([...fileUploads, newFileUpload]);
   };
 
-  // Handle drag over
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(true); // Set visual feedback
+  const handleRemoveFile = (id) => {
+    const updatedFiles = fileUploads.filter(file => file.id !== id);
+    setFileUploads(updatedFiles);
   };
 
-  // Handle drag leave
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false); // Remove visual feedback
-  };
-
-  // Handle file drop
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false); // Remove visual feedback
-    const droppedFiles = e.dataTransfer.files;
-    if (droppedFiles && droppedFiles.length > 0) {
-      console.log('File dropped:', droppedFiles[0]); // Logging to ensure file is detected
-      setFormData({
-        ...formData,
-        file: droppedFiles[0], // Assign the dropped file to state
-      });
-    }
-  };
-
-  // Handle file upload
-  const handleUpload = async () => {
-    const form = new FormData();
-    if (formData.file) form.append('file', formData.file); // Append the file to the form data
-
-    try {
-      await uploadSoftware(form);
-      alert('Software uploaded successfully');
-      navigate('/');
-    } catch (error) {
-      console.error('Error uploading software:', error);
-      alert('Failed to upload software');
-    }
+  const handleCancel = () => {
+    navigate('/'); // Redirect to Home Catalog List page
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-4xl font-bold mb-8">SW Upload</h1>
-      <div
-        className={`border-2 border-dashed ${dragActive ? 'border-blue-500' : 'border-gray-400'} 
-                    rounded-lg p-16 text-center bg-white shadow-xl w-full max-w-3xl h-[50vh] overflow-auto`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <p className="text-lg mb-4">Drag and drop a file here or click below to choose a file</p>
-        <input
-          type="file"
-          name="file"
-          onChange={handleFileChange}
-          className="mt-4"
-        />
-        {/* Debugging - display the file name */}
-        {formData.file && <p className="mt-4 text-sm text-gray-600">Selected File: {formData.file.name}</p>}
-      </div>
+    <div className="container mx-auto p-8">
+      <h1 className="text-3xl font-bold mb-8">SW Catlog</h1>
 
-      <div className="mt-6 flex space-x-4">
+      <div className="border rounded-lg p-8 bg-white shadow-md">
+        {/* SW File Upload Section */}
+        <div className="grid grid-cols-2 gap-6 mb-6">
+          <div>
+            <label className="block font-semibold mb-2">Select ECU</label>
+            <select className="w-full border border-gray-300 rounded p-2">
+              <option value="">Select ECU</option>
+              <option value="ECU1">ECU1</option>
+              <option value="ECU2">ECU2</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2">Select Config ID</label>
+            <select className="w-full border border-gray-300 rounded p-2">
+              <option value="">Select Config ID</option>
+              <option value="Config1">Config1</option>
+              <option value="Config2">Config2</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Vendor Name</label>
+          <select className="w-full border border-gray-300 rounded p-2">
+            <option value="">Select Vendor</option>
+            <option value="Bosch">Bosch</option>
+            <option value="Aptive">Aptive</option>
+          </select>
+        </div>
+
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Vehicle Model</label>
+          <div>
+            <input type="radio" id="harrier" name="vehicleModel" value="Harrier" />
+            <label htmlFor="harrier" className="ml-2 mr-4">Harrier</label>
+
+            <input type="radio" id="safari" name="vehicleModel" value="Safari" />
+            <label htmlFor="safari" className="ml-2 mr-4">Safari</label>
+
+            <input type="radio" id="curvv" name="vehicleModel" value="Curvv" />
+            <label htmlFor="curvv" className="ml-2">Curvv</label>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Vehicle Variant</label>
+          <input type="text" className="w-full border border-gray-300 rounded p-2" placeholder="e.g., A1/XZ/AMA/Sport" />
+        </div>
+
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">SW Release Version</label>
+          <input type="text" className="w-full border border-gray-300 rounded p-2" placeholder="e.g., 1.0"/> 
+        </div>
+
+
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">HW PartNumber</label>
+          <input type="text" className="w-full border border-gray-300 rounded p-2" placeholder="e.g., HW_123456" />
+        </div>
+
+        <div className="mb-6">
+          <label className="block font-semibold mb-2">Communication Protocol</label>
+          <input type="text" className="w-full border border-gray-300 rounded p-2" placeholder="e.g., UDS/ETH" />
+        </div>
+
+        {/* Security Access Section */}
+        <h2 className="text-xl font-semibold mb-4">Security Access</h2>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block font-semibold mb-2">Security Method</label>
+            <input type="text" className="w-full border border-gray-300 rounded p-2" />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2">Security Level</label>
+            <input type="text" className="w-full border border-gray-300 rounded p-2" />
+          </div>
+
+          <div>
+            <label className="block font-semibold mb-2">FW Signature</label>
+            <input type="text" className="w-full border border-gray-300 rounded p-2" />
+          </div>
+        </div>
+
+        {/* File Upload Section */}
+        <h2 className="text-xl font-semibold mt-8 mb-4">File Upload</h2>
+
+        {fileUploads.map((file, index) => (
+          <div key={file.id} className="mb-4 border border-gray-300 rounded p-4">
+            <h3 className="font-semibold mb-2">File {index + 1}</h3>
+            <div className="grid grid-cols-4 gap-4">
+              <div>
+                <label className="block font-semibold mb-2">Partition</label>
+                <select className="w-full border border-gray-300 rounded p-2">
+                  <option value="">Select Partition</option>
+                  {/* Add your partition options here */}
+                  <option value="P1">Partition 1</option>
+                  <option value="P2">Partition 2</option>
+                  <option value="P3">Partition 3</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-2">File Format</label>
+                <select className="w-full border border-gray-300 rounded p-2">
+                  <option value="">Select Format</option>
+                  <option value="intel-hex">Intel Hex</option>
+                  <option value="motorola">Motorola</option>
+                  <option value="binary">Binary</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-2">Start Address</label>
+                <input type="text" className="w-full border border-gray-300 rounded p-2" />
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-2">Binary File Upload</label>
+                <input type="file" className="w-full" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-4 mt-4">
+              <div>
+                <label className="block font-semibold mb-2">Compressed Size</label>
+                <input type="text" className="w-full border border-gray-300 rounded p-2" />
+              </div>
+
+              <div>
+                <label className="block font-semibold mb-2">Uncompressed Size</label>
+                <input type="text" className="w-full border border-gray-300 rounded p-2" />
+              </div>
+
+              <div className="flex items-center">
+                <input type="checkbox" className="mr-2" />
+                <label className="font-semibold">Is Encrypted</label>
+              </div>
+
+              <div className="flex items-center">
+                <input type="checkbox" className="mr-2" />
+                <label className="font-semibold">Is Compressed</label>
+              </div>
+            </div>
+
+            {/* Cancel Button to remove file section */}
+            {index > 0 && (
+              <button
+                className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={() => handleRemoveFile(file.id)}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* Button to add another file section */}
         <button
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
-          onClick={handleUpload}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          onClick={handleAddFile}
         >
-          Upload SW
+          + Add Another File
         </button>
-        <button
-          className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600"
-          onClick={() => navigate('/')}
-        >
-          Cancel
-        </button>
+
+        {/* Submit and Cancel buttons */}
+        <div className="mt-8 flex space-x-4">
+          <button className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600">
+            Upload SW
+          </button>
+          <button
+            className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600"
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default UploadSw;
+export default UploadPage;
