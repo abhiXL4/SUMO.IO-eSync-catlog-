@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { FiDownload, FiEye, FiChevronDown, FiChevronRight, FiHome, FiEdit, FiCheckCircle } from 'react-icons/fi'; // Import icons
+import { FiDownload, FiEye, FiChevronDown, FiChevronRight, FiHome, FiCheckCircle } from 'react-icons/fi'; 
 import { useNavigate } from 'react-router-dom';
-import { getCatalogList, filterCatalog, sortCatalog, retireCatalog, downloadFile } from '../services/apiService';
+import { getCatalogList, filterCatalog, sortCatalog, downloadFile } from '../services/apiService';
 
 const SWCatalog = () => {
   const [data, setData] = useState([]);
   const [catalogFilter, setCatalogFilter] = useState('SW CATALOG');
   const [statusFilter, setStatusFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('uploadDateTime'); // Default sort option
-  const [ascending, setAscending] = useState(true); // Default to ascending order
+  const [sortBy, setSortBy] = useState('uploadDateTime'); 
+  const [ascending, setAscending] = useState(true); 
   const [expandedECUs, setExpandedECUs] = useState({});
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +34,6 @@ const SWCatalog = () => {
     }
   };
 
-  // Apply filters and sorting to the catalog data
   const applyFilterAndSort = async () => {
     try {
       const filteredData = await filterCatalog(getCatalogEndpoint(catalogFilter), { ecuName: searchTerm });
@@ -44,7 +43,6 @@ const SWCatalog = () => {
     }
   };
 
-  // Apply sorting to the catalog data
   const applySorting = async () => {
     try {
       const sortedData = await sortCatalog(getCatalogEndpoint(catalogFilter), sortBy, ascending);
@@ -54,18 +52,16 @@ const SWCatalog = () => {
     }
   };
 
-  // Handle retiring a catalog entry
-  const handleRetire = async (id) => {
-    try {
-      await retireCatalog(getCatalogEndpoint(catalogFilter), id);
-      const updatedData = await getCatalogList(getCatalogEndpoint(catalogFilter));
-      setData(updatedData);
-    } catch (error) {
-      console.error('Error retiring catalog entry:', error);
-    }
-  };
+  // const handleRetire = async (id) => {
+  //   try {
+  //     await retireCatalog(getCatalogEndpoint(catalogFilter), id);
+  //     const updatedData = await getCatalogList(getCatalogEndpoint(catalogFilter));
+  //     setData(updatedData);
+  //   } catch (error) {
+  //     console.error('Error retiring catalog entry:', error);
+  //   }
+  // };
 
-  // Handle file download
   const handleDownload = async (id, fileType) => {
     try {
       await downloadFile(getCatalogEndpoint(catalogFilter), id, fileType);
@@ -74,11 +70,10 @@ const SWCatalog = () => {
     }
   };
 
-  // New logic to handle the view button click
-  const handleView = (ecuName) => {
-    // Navigate to detailed ECU view page, passing the ECU name in the URL
-    navigate(`/${ecuName}`);
+  const handleView = (ecuName, containerId) => {
+    navigate(`/view`, { state: { ecuName, containerId } });
   };
+  
 
   const toggleExpand = (ecuName) => {
     setExpandedECUs((prevState) => ({
@@ -87,6 +82,7 @@ const SWCatalog = () => {
     }));
   };
 
+  // Group the data by ECU name
   const groupedData = data.reduce((acc, item) => {
     if (!acc[item.ecuName]) {
       acc[item.ecuName] = [];
@@ -116,7 +112,7 @@ const SWCatalog = () => {
             <option>ACTIVE</option>
             <option>RETIRED</option>
           </select>
-    
+
           <input
             type="text"
             placeholder="Search by ECU Name or Container ID"
@@ -126,7 +122,6 @@ const SWCatalog = () => {
           />
           <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={applyFilterAndSort}>Go</button>
 
-          {/* Sorting controls */}
           <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="border p-2 rounded">
             <option value="uploadDateTime">Upload Date</option>
             <option value="ecuName">ECU Name</option>
@@ -134,8 +129,8 @@ const SWCatalog = () => {
           <button
             className="bg-gray-500 text-white px-4 py-2 rounded"
             onClick={() => {
-              setAscending(!ascending); // Toggle sorting order
-              applySorting(); // Apply the sorting
+              setAscending(!ascending); 
+              applySorting(); 
             }}
           >
             {ascending ? 'Asc' : 'Desc'}
@@ -146,26 +141,28 @@ const SWCatalog = () => {
         </button>
       </div>
 
-      {/* Catalog Table */}
-      <div className="overflow-x-auto h-96">
+      <div className="overflow-x-auto h-500">
         <table className="min-w-full table-auto border-collapse">
           <thead className="bg-gray-200 sticky top-0">
             <tr>
               <th className="p-2 text-left">ECU Name</th>
-              <th className="p-2 text-left">Container ID</th>
-              <th className="p-2 text-left">Uploaded By</th>
-              <th className="p-2 text-left">Date Uploaded</th>
+              <th className="p-2 text-center">SW Type</th>
+              <th className="p-2 text-center">Version</th>
+              <th className="p-2 text-center">Container ID</th>
+              <th className="p-2 text-center">Uploaded By</th>
+              <th className="p-2 text-center">Date Uploaded</th>
               <th className="p-2 text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             {Object.keys(groupedData).length === 0 ? (
               <tr>
-                <td className="p-4 text-center" colSpan="5">No data available.</td>
+                <td className="p-4 text-center" colSpan="7">No data available.</td>
               </tr>
             ) : (
               Object.keys(groupedData).map((ecuName) => (
                 <React.Fragment key={ecuName}>
+                  {/* First row with summary only */}
                   <tr className="border-t">
                     <td className="p-2" onClick={() => toggleExpand(ecuName)}>
                       <div className="flex items-center cursor-pointer">
@@ -173,70 +170,38 @@ const SWCatalog = () => {
                         <span className="ml-2 font-semibold">{ecuName}</span>
                       </div>
                     </td>
-                    <td className="p-2">{groupedData[ecuName][0].containerId}</td>
-                    <td className="p-2">{groupedData[ecuName][0].uploadedBy || 'Unknown'}</td>
-                    <td className="p-2">{groupedData[ecuName][0].uploadDateTime || 'N/A'}</td>
-                    <td className="p-2 text-center flex space-x-2">
-                      <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => navigate(`/modify/${groupedData[ecuName][0].id}`)}>
-                        <FiEdit title="Modify" />
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => handleRetire(groupedData[ecuName][0].id)}>
-                        Retire
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => handleDownload(groupedData[ecuName][0].id, 'TestReport')}>
-                        <FiDownload title="Download" />
-                      </button>
-                      {/* Add the View button logic here */}
-                      <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => handleView(ecuName)}>
+                    <td className="p-2 text-center">N/A</td>
+                    <td className="p-2 text-center">N/A</td>
+                    <td className="p-2 text-center">{groupedData[ecuName][0].containerId || 'N/A'}</td>
+                    <td className="p-2 text-center">{groupedData[ecuName][0].uploadedBy || 'Unknown'}</td>
+                    <td className="p-2 text-center">{groupedData[ecuName][0].releaseDate || 'N/A'}</td>
+                    <td className="p-2 text-center flex justify-center space-x-1">
+                      <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => handleView(ecuName, groupedData[ecuName][0].containerId)}>
                         <FiEye title="View" />
                       </button>
-                      <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => {/* Add status check logic here */}}>
-                        <FiCheckCircle title="Status Check" />
+                      
+                      <FiCheckCircle className="text-gray-600 hover:text-gray-800"title="Check List" />
+                      
+                      <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => handleDownload(groupedData[ecuName][0].id, 'sw')}>
+                        <FiDownload title="Download" />
                       </button>
                     </td>
                   </tr>
 
-                  {expandedECUs[ecuName] && (
-                    <tr>
-                      <td colSpan="5" className="p-2 bg-gray-100">
-                        <div className="max-h-48 overflow-y-auto">
-                          <table className="min-w-full table-auto">
-                            <thead className="bg-gray-100">
-                              <tr>
-                                <th className="p-2 text-left">ECU Name</th>
-                                <th className="p-2 text-left">SW Type</th>
-                                <th className="p-2 text-left">Version</th>
-                                <th className="p-2 text-left">Container ID</th>
-                                <th className="p-2 text-left">Uploaded By</th>
-                                <th className="p-2 text-left">Date Uploaded</th>
-                                <th className="p-2 text-center">Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {groupedData[ecuName].map((item) => (
-                                <tr key={item.id} className="border-t">
-                                  <td className="p-2">{item.ecuName}</td>
-                                  <td className="p-2">{item.swType}</td>
-                                  <td className="p-2">{item.version}</td>
-                                  <td className="p-2">{item.containerId}</td>
-                                  <td className="p-2">{item.uploadedBy || 'Unknown'}</td>
-                                  <td className="p-2">{item.uploadDateTime || 'N/A'}</td>
-                                  <td className="p-2 text-center flex space-x-2">
-                                    <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => {/* Add view logic here */}}>
-                                      <FiEye title="View" />
-                                    </button>
-                                    <button className="text-gray-600 hover:text-gray-800 p-1" onClick={() => {/* Add status check logic here */}}>
-                                      <FiCheckCircle title="Status Check" />
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                  {/* Expanded rows for detailed data */}
+                  {expandedECUs[ecuName] && groupedData[ecuName].map((item) => (
+                    <tr key={item.id} className="border-t bg-gray-200">
+                      <td className="p-2 pl-10">{item.ecuName}</td>
+                      <td className="p-2 text-center">{item.swType || 'N/A'}</td>
+                      <td className="p-2 text-center">{item.version || 'N/A'}</td>
+                      <td className="p-2 text-center">{item.containerId || 'N/A'}</td>
+                      <td className="p-2 text-center">{item.uploadedBy || 'Unknown'}</td>
+                      <td className="p-2 text-center">{item.releaseDate || 'N/A'}</td>
+                      <td className="p-2 text-center flex justify-center space-x-1">
+                        
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </React.Fragment>
               ))
             )}
