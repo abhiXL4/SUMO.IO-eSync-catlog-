@@ -58,7 +58,7 @@ const ECUDetails = () => {
       {/* Add a "Back to Catalog" button to return to catalog page */}
       <button 
         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-        onClick={() => navigate('/home-catalog-list')} // Use navigate to change route
+        onClick={() => navigate('/')} // Use navigate to change route
       >
         Back to Catalog
       </button>

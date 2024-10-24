@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SWCatalog from './components/SWCatalog'; // Main catalog page (can handle SW, RD, Config)
 import Sidebar from './components/sidebar'; // Sidebar navigation component
 import UploadPage from './components/UploadSw'; // Upload SW page
-import ECUDetails from './components/ECUDetails';
+// import ECUDetails from './components/ECUDetails';
+import ViewPage from './components/ViewPage';
 
 function App() {
   return (
@@ -16,8 +17,10 @@ function App() {
             <Route path="/" element={<SWCatalog />} />
             {/* Upload SW page route */}
             <Route path="/upload" element={<UploadPage />} />
-            {/* View ECU Details page route */}
-            <Route path="/:ecuName" element={<ECUDetails />} />
+            {/* View ECU Details page route
+            <Route path="/:ecuName" element={<ECUDetails />} /> */}
+            {/* View CATLOG Details page route */}
+            <Route path="/view" element={<ViewPage />} />
           </Routes>
         </main>
       </div>

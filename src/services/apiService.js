@@ -16,15 +16,28 @@ export const getCatalogList = async (catalogType) => {
   }
 };
 
+// /**
+//  * Fetch ECU details by ECU name (added this function based on your requirement)
+//  */
+// export const getECUDetails = async (ecuName) => {
+//   try {
+//     const response = await axios.get(`${BASE_URL}/ecu/${ecuName}`); // Assuming your API has this endpoint
+//     return response.data;
+//   } catch (error) {
+//     console.error(`Error fetching details for ECU: ${ecuName}`, error);
+//     throw error;
+//   }
+// };
+
 /**
  * Fetch ECU details by ECU name (added this function based on your requirement)
  */
-export const getECUDetails = async (ecuName) => {
+export const getCatalogDetails = async (ecuName, containerId) => {
   try {
-    const response = await axios.get(`${BASE_URL}/ecu/${ecuName}`); // Assuming your API has this endpoint
+    const response = await axios.get(`${BASE_URL}/view/${ecuName}/${containerId}`); // Assuming your API has this endpoint
     return response.data;
   } catch (error) {
-    console.error(`Error fetching details for ECU: ${ecuName}`, error);
+    console.error(`Error fetching details for ECU: ${ecuName}, Container: ${containerId}`, error);
     throw error;
   }
 };
