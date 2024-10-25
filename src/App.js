@@ -5,6 +5,7 @@ import Sidebar from './components/sidebar'; // Sidebar navigation component
 import UploadPage from './components/UploadSw'; // Upload SW page
 // import ECUDetails from './components/ECUDetails';
 import ViewPage from './components/ViewPage';
+import UploadConfig from './components/UploadConfig';
 
 function App() {
   return (
@@ -21,6 +22,8 @@ function App() {
             <Route path="/:ecuName" element={<ECUDetails />} /> */}
             {/* View CATLOG Details page route */}
             <Route path="/view" element={<ViewPage />} />
+
+            <Route path="/config-upload" element={<UploadConfig />} />
           </Routes>
         </main>
       </div>
