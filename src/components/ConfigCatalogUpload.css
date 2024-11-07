@@ -1,0 +1,122 @@
+.config-catalog {
+    width: 80%;
+    margin: 20px auto;
+    background-color: #f8f9fa;
+    border: 1px solid #ccc;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+  }
+  
+  h1 {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .section {
+    margin-bottom: 40px;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+  
+  h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    font-size: 14px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .vehicle-models {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .vehicle-models input {
+    margin-right: 5px;
+  }
+  
+  .vehicle-models label {
+    margin-right: 15px;
+  }
+  
+  h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .btn.next-btn {
+    background-color: #007bff;
+  }
+  
+  .btn.confirm-btn {
+    background-color: #28a745;
+  }
+  
+  .btn:hover {
+    opacity: 0.8;
+  }
+  
+  .next-btn {
+    margin-top: 20px;
+  }
+  
+
+
+  /* ConfigCatalogUpload.css */
+
+.config-catalog {
+    position: relative;
+    padding: 30px;
+  }
+  
+  .ok-btn {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .ok-btn:hover {
+    background-color: #0056b3;
+  }
+  
