@@ -103,20 +103,43 @@ export const retireCatalog = async (catalogType, id) => {
 // /**
 //  * Download a file (Test Report or Release Notes)
 //  */
- export const downloadFile = async (catalogType, id, fileType) => {
-   try {
-     const response = await axios.post(`${BASE_URL}/${catalogType}/download`, { id, fileType }, { responseType: 'blob' });
+export const downloadFile = async (catalogType, id, fileType) => {
+  try {
+    // Request a presigned download URL based on `catalogType`, `id`, and `fileType`
+    const response = await axios.get(
+      `${BASE_URL}/${catalogType}/download`,
+      { id, fileType },
+      { responseType: 'blob' } // Download as blob for file handling
+    );
+
+    // Create a URL for the downloaded file blob and trigger download
     const url = window.URL.createObjectURL(new Blob([response.data]));
-     const link = document.createElement('a');
-     link.href = url;
-     link.setAttribute('download', `${fileType}_${id}.pdf`);
-     document.body.appendChild(link);
-     link.click();
-   } catch (error) {
-     console.error(`Error downloading file from ${catalogType}:`, error);
-     throw error;
-   }
- };
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${fileType}_${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error(`Error downloading file from ${catalogType}:`, error);
+    throw error;
+  }
+};
+
+export const requestPresignedDownloadUrls = async (catalogueId) => {
+  try {
+    const response = await axios.get(
+      `${BASE_URL}/catalogue_items/presigned_download_urls`,
+      { params: { catalogueId } }
+    );
+    console.log('Received presigned download URLs:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Error requesting presigned download URLs:', error);
+    alert('Error fetching download URLs. Please try again.');
+    return [];
+  }
+};
 
 // /**
 //  * Update the status of a catalog entry
@@ -160,7 +183,7 @@ export const getEcuItems = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching ECU items:", error);
-    throw error;
+    throw error;  
   }
 };
 
